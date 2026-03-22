@@ -1,0 +1,484 @@
+<!-- movies/templates/catalog.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог фильмов - Кинотека</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .navbar {
+            background-color: #2c3e50;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 1.5rem;
+        }
+
+        .navbar .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .navbar .user-info {
+            margin-left: 1rem;
+            padding-left: 1rem;
+            border-left: 1px solid #7f8c8d;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .messages {
+            margin-bottom: 1rem;
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-filter {
+            background-color: #2c3e50;
+            width: 100%;
+        }
+
+        .btn-filter:hover {
+            background-color: #1a252f;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin: 1rem 0 1.5rem;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Фильтры */
+        .filters-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .filters-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 0.25rem;
+        }
+
+        .filter-group input, .filter-group select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            align-items: center;
+        }
+
+        .sort-bar {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .sort-select {
+            padding: 0.4rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .results-count {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .movie-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background-color: #ddd;
+        }
+
+        .movie-info {
+            padding: 1rem;
+        }
+
+        .movie-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-year {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .movie-rating {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .rating-badge {
+            background-color: #f39c12;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .rating-count {
+            color: #7f8c8d;
+        }
+
+        .rating-imdb {
+            font-size: 0.8rem;
+            color: #f39c12;
+            margin-top: 0.25rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .pagination a, .pagination span {
+            padding: 0.5rem 0.75rem;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .pagination a:hover {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .pagination .current {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 8px;
+            color: #7f8c8d;
+        }
+
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .clear-filters {
+            color: #e74c3c;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .clear-filters:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div>
+            <a href="{% url 'films' %}" class="logo">🎬 Кинотека</a>
+            <a href="{% url 'catalog' %}">Каталог</a>
+            <a href="{% url 'my_ratings' %}">Мои оценки</a>
+            <a href="{% url 'add_films' %}">Добавить фильм в каталог</a>
+        </div>
+        <div>
+            <span class="user-info">{{ user.username }}</span>
+            <a href="{% url 'logout' %}">Выйти</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <h1 class="section-title">📚 Каталог фильмов</h1>
+
+        <!-- Панель фильтров -->
+        <div class="filters-panel">
+            <div class="filters-title">🔍 Фильтры</div>
+            <form method="get" action="{% url 'catalog' %}">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="genre">Жанр</label>
+                        <select name="genre" id="genre">
+                            <option value="">Все жанры</option>
+                            {% for genre in all_genres %}
+                                <option value="{{ genre.id }}" {% if current_filters.genre == genre.id|stringformat:"i" %}selected{% endif %}>
+                                    {{ genre.name }} ({{ genre.movie_count }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="year_from">Год от</label>
+                        <input type="number" name="year_from" id="year_from" min="1880" max="2025" value="{{ current_filters.year_from }}" placeholder="1880">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="year_to">Год до</label>
+                        <input type="number" name="year_to" id="year_to" min="1880" max="2025" value="{{ current_filters.year_to }}" placeholder="2025">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="min_rating">Мин. рейтинг IMDb</label>
+                        <input type="number" name="min_rating" id="min_rating" min="0" max="10" step="0.1" value="{{ current_filters.min_rating }}" placeholder="0">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="search">Поиск по названию</label>
+                        <input type="text" name="search" id="search" value="{{ current_filters.search }}" placeholder="Введите название...">
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-filter">Применить фильтры</button>
+                    <a href="{% url 'catalog' %}" class="clear-filters">Сбросить все фильтры</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Сортировка -->
+        <div class="sort-bar">
+            <div>
+                <label for="sort">Сортировать по: </label>
+                <select name="sort" id="sort" onchange="window.location.href=updateSortParameter(this.value)">
+                    <option value="-year" {% if current_filters.sort == '-year' %}selected{% endif %}>Году (новые)</option>
+                    <option value="year" {% if current_filters.sort == 'year' %}selected{% endif %}>Году (старые)</option>
+                    <option value="-user_rating_avg" {% if current_filters.sort == '-user_rating_avg' %}selected{% endif %}>Рейтингу (высокий)</option>
+                    <option value="user_rating_avg" {% if current_filters.sort == 'user_rating_avg' %}selected{% endif %}>Рейтингу (низкий)</option>
+                    <option value="title" {% if current_filters.sort == 'title' %}selected{% endif %}>Названию (А-Я)</option>
+                    <option value="-title" {% if current_filters.sort == '-title' %}selected{% endif %}>Названию (Я-А)</option>
+                </select>
+            </div>
+            <div class="results-count">
+                Найдено фильмов: {{ page_obj.paginator.count }}
+            </div>
+        </div>
+
+        <!-- Сетка фильмов -->
+        {% if page_obj %}
+            <div class="movie-grid">
+                {% for movie in page_obj %}
+                    <a href="{% url 'movie_detail' movie.id %}" class="movie-card">
+                        {% if movie.poster %}
+                            <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="movie-poster" onerror="this.src='https://via.placeholder.com/200x300?text=No+Poster'">
+                        {% else %}
+                            <div class="movie-poster" style="display: flex; align-items: center; justify-content: center; color: #999;">Нет постера</div>
+                        {% endif %}
+                        <div class="movie-info">
+                            <div class="movie-title">{{ movie.title }}</div>
+                            <div class="movie-year">{{ movie.year }}</div>
+                            <div class="movie-rating">
+                                <span class="rating-badge">⭐ {{ movie.user_rating_avg|floatformat:1|default:"Н/Д" }}</span>
+                                <span class="rating-count">{{ movie.rating_count }} оценок</span>
+                            </div>
+                            {% if movie.imbd_rating %}
+                                <div class="rating-imdb">IMDb: {{ movie.imbd_rating }}</div>
+                            {% endif %}
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+
+            <!-- Пагинация -->
+            {% if page_obj.paginator.num_pages > 1 %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&laquo; Первая</a>
+                        <a href="?page={{ page_obj.previous_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">‹ Предыдущая</a>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="current">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Следующая ›</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Последняя &raquo;</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="no-results">
+                <h3>😕 Фильмы не найдены</h3>
+                <p>Попробуйте изменить параметры фильтрации</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Кинотека.</p>
+    </footer>
+
+    <script>
+        // Функция для обновления сортировки с сохранением остальных параметров
+        function updateSortParameter(sortValue) {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('sort', sortValue);
+            urlParams.set('page', '1'); // Сброс на первую страницу
+            return window.location.pathname + '?' + urlParams.toString();
+        }
+
+        // Автоматическое скрытие сообщений
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,630 @@
+<!-- movies/templates/movie_detail.html -->
+{% load movie_extras %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ movie.title }} - Кинотека</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .navbar {
+            background-color: #2c3e50;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 1.5rem;
+        }
+
+        .navbar .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .navbar .user-info {
+            margin-left: 1rem;
+            padding-left: 1rem;
+            border-left: 1px solid #7f8c8d;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .messages {
+            margin-bottom: 1rem;
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+        }
+
+        .btn-success:hover {
+            background-color: #229954;
+        }
+
+        .movie-header {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .movie-hero {
+            display: flex;
+            padding: 2rem;
+            gap: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .movie-poster-large {
+            width: 300px;
+            height: 450px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .movie-info-large {
+            flex: 1;
+        }
+
+        .movie-title-large {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .movie-year-large {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+
+        .movie-meta {
+            display: flex;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .meta-item {
+            text-align: center;
+        }
+
+        .meta-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .meta-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .star {
+            font-size: 2rem;
+            cursor: pointer;
+            color: #f39c12;
+            transition: transform 0.2s;
+        }
+
+        .star:hover {
+            transform: scale(1.2);
+        }
+
+        .star.selected {
+            color: #f1c40f;
+            text-shadow: 0 0 10px #f39c12;
+        }
+
+        .user-rating-info {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+
+        .movie-content {
+            padding: 2rem;
+            background: white;
+        }
+
+        .movie-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .genres {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .genre-tag {
+            background-color: #3498db;
+            color: white;
+            padding: 0.25rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+
+        .ratings-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .rating-distribution {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .distribution-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .distribution-label {
+            width: 40px;
+            text-align: right;
+        }
+
+        .distribution-progress {
+            flex: 1;
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .distribution-fill {
+            height: 100%;
+            background-color: #f39c12;
+            transition: width 0.3s;
+        }
+
+        .distribution-count {
+            width: 50px;
+            color: #7f8c8d;
+        }
+
+        .recent-ratings {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .rating-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .rating-item:last-child {
+            border-bottom: none;
+        }
+
+        .rating-user {
+            font-weight: 500;
+        }
+
+        .rating-value {
+            background-color: #f39c12;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .rating-date {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        .similar-movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .similar-movie-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.3s;
+        }
+
+        .similar-movie-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .similar-movie-poster {
+            width: 100%;
+            height: 225px;
+            object-fit: cover;
+        }
+
+        .similar-movie-info {
+            padding: 0.75rem;
+        }
+
+        .similar-movie-title {
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .similar-movie-year {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .rating-message {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .success-message {
+            color: #27ae60;
+        }
+
+        .error-message {
+            color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .movie-hero {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .movie-poster-large {
+                width: 200px;
+                height: 300px;
+            }
+
+            .movie-meta {
+                justify-content: center;
+            }
+
+            .ratings-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div>
+            <a href="{% url 'films' %}" class="logo">🎬 Кинотека</a>
+            <a href="{% url 'catalog' %}">Каталог</a>
+            <a href="{% url 'my_ratings' %}">Мои оценки</a>
+        </div>
+        <!-- В шаблоне movie_detail.html -->
+        <div class="movie-actions" style="margin-top: 1rem; display: flex; gap: 1rem;">
+            <a href="{% url 'edit_film' movie.id %}" class="btn">✏️ Редактировать</a>
+            <!-- другие кнопки -->
+        </div>
+        <div>
+            <span class="user-info">{{ user.username }}</span>
+            <a href="{% url 'logout' %}">Выйти</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <a href="javascript:history.back()" class="back-link">← Назад</a>
+
+        <div class="movie-header">
+            <div class="movie-hero">
+                {% if movie.poster %}
+                    <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="movie-poster-large" onerror="this.src='https://via.placeholder.com/300x450?text=No+Poster'">
+                {% else %}
+                    <div class="movie-poster-large" style="background: #ddd; display: flex; align-items: center; justify-content: center; color: #999;">Нет постера</div>
+                {% endif %}
+
+                <div class="movie-info-large">
+                    <h1 class="movie-title-large">{{ movie.title }}</h1>
+                    <div class="movie-year-large">{{ movie.year }} год</div>
+
+                    <div class="movie-meta">
+                        <div class="meta-item">
+                            <div class="meta-value">{{ rating_stats.avg|floatformat:1 }}</div>
+                            <div class="meta-label">Средняя оценка</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-value">{{ rating_stats.count }}</div>
+                            <div class="meta-label">Оценок</div>
+                        </div>
+                        {% if movie.imbd_rating %}
+                        <div class="meta-item">
+                            <div class="meta-value">{{ movie.imbd_rating }}</div>
+                            <div class="meta-label">IMDb</div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+
+
+                    <!-- Звезды для оценки -->
+                    <div class="rating-stars" id="rating-stars">
+                        {% for i in "123456789"|make_list %}
+                            {% with star_num=forloop.counter %}
+                                <span class="star {% if user_rating and user_rating.rating >= star_num %}selected{% endif %}"
+                                      onclick="rateMovie({{ star_num }})"
+                                      data-rating="{{ star_num }}">★</span>
+                            {% endwith %}
+                        {% endfor %}
+                        <!-- Отдельно добавляем 10-ю звезду (так проще чем делать цифру 10) -->
+                        <span class="star {% if user_rating and user_rating.rating >= 10 %}selected{% endif %}"
+                              onclick="rateMovie(10)"
+                              data-rating="10">★</span>
+                    </div>
+
+                    {% if user_rating %}
+                        <div class="user-rating-info">
+                            Ваша оценка: <strong>{{ user_rating.rating }}/10</strong> ({{ user_rating.rated_at|date:"d.m.Y" }})
+                        </div>
+                    {% endif %}
+
+                    <div id="rating-message" class="rating-message"></div>
+                </div>
+            </div>
+
+            <div class="movie-content">
+                <!-- Жанры -->
+                {% if genres %}
+                    <div class="genres">
+                        {% for movie_genre in genres %}
+                            <span class="genre-tag">{{ movie_genre.genre.name }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Описание -->
+                {% if movie.description %}
+                    <div class="movie-description">
+                        {{ movie.description }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Секция с оценками -->
+        <h2 class="section-title">📊 Статистика оценок</h2>
+        <div class="ratings-section">
+            <!-- Распределение оценок -->
+            <div class="rating-distribution">
+                <h3 style="margin-bottom: 1rem;">Распределение оценок</h3>
+                {% for i in "12345678910"|make_list %}
+                    {% with rating_value=forloop.counter %}
+                        {% with count=rating_stats.distribution|get_item:rating_value %}
+                            {% if count > 0 %}
+                                <div class="distribution-bar">
+                                    <span class="distribution-label">{{ rating_value }}</span>
+                                    <div class="distribution-progress">
+                                        <div class="distribution-fill" style="width: {% widthratio count rating_stats.count 100 %}%"></div>
+                                    </div>
+                                    <span class="distribution-count">{{ count }}</span>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    {% endwith %}
+                {% endfor %}
+            </div>
+
+            <!-- Последние оценки -->
+            <div class="recent-ratings">
+                <h3 style="margin-bottom: 1rem;">Последние оценки</h3>
+                {% for rating in ratings %}
+                    <div class="rating-item">
+                        <span class="rating-user">{{ rating.user.username }}</span>
+                        <div>
+                            <span class="rating-value">{{ rating.rating }}</span>
+                            <span class="rating-date">{{ rating.rated_at|date:"d.m.Y" }}</span>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p>Пока нет оценок</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Похожие фильмы -->
+        {% if similar_movies %}
+            <h2 class="section-title">🎬 Похожие фильмы</h2>
+            <div class="similar-movies-grid">
+                {% for movie in similar_movies %}
+                    <a href="{% url 'movie_detail' movie.id %}" class="similar-movie-card">
+                        {% if movie.poster_url %}
+                            <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="similar-movie-poster" onerror="this.src='https://via.placeholder.com/150x225?text=No+Poster'">
+                        {% else %}
+                            <div class="similar-movie-poster" style="background: #ddd; display: flex; align-items: center; justify-content: center; color: #999;">Нет постера</div>
+                        {% endif %}
+                        <div class="similar-movie-info">
+                            <div class="similar-movie-title">{{ movie.title }}</div>
+                            <div class="similar-movie-year">{{ movie.year }}</div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Кинотека. Курсовой проект по рекомендательным системам</p>
+    </footer>
+
+    <script>
+        // Функция для оценки фильма
+        function rateMovie(rating) {
+            fetch("{% url 'rate_movie' movie.id %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: 'rating=' + rating
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageDiv = document.getElementById('rating-message');
+                if (data.success) {
+                    messageDiv.innerHTML = '<span class="success-message">✓ Оценка сохранена!</span>';
+
+                    // Обновляем звезды
+                    const stars = document.querySelectorAll('.star');
+                    stars.forEach((star, index) => {
+                        if (index < rating) {
+                            star.classList.add('selected');
+                        } else {
+                            star.classList.remove('selected');
+                        }
+                    });
+
+                    // Перезагружаем страницу через секунду для обновления статистики
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    messageDiv.innerHTML = '<span class="error-message">✗ Ошибка: ' + data.error + '</span>';
+                }
+            })
+            .catch(error => {
+                document.getElementById('rating-message').innerHTML = '<span class="error-message">✗ Ошибка соединения</span>';
+            });
+        }
+
+        // Автоматическое скрытие сообщений
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>
